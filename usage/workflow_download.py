@@ -3,8 +3,9 @@ from jmcomic.cl import JmcomicUI
 
 # 下方填入你要下载的本子的id，一行一个，每行的首尾可以有空白字符
 jm_albums = '''
-
-
+斗罗大陆
+斗破苍穹
+神印王座
 
 '''
 
@@ -49,88 +50,88 @@ def main():
     helper.photo_id_list = list(photo_id_set)
 
     option = get_option()
-    helper.run(option)
-    option.call_all_plugin('after_download')
+助手。跑(选项)
+选项。call_all_plugin('下载后')
 
 
-def get_option():
-    # 读取 option 配置文件
-    option = create_option(os.path.abspath(os.path.join(__file__, '../../assets/option/option_workflow_download.yml')))
+定义 get_option():
+    #读取选项配置文件
+option=create_option(操作系统。路径.abspath(操作系统。路径.参加(__file__，'。。/。。/assets/option/option_workflow_download.yml')))
 
     # 支持工作流覆盖配置文件的配置
-    cover_option_config(option)
+    cover_option_config(选项)
 
-    # 把请求错误的html下载到文件，方便GitHub Actions下载查看日志
+    #把请求错误的html下载到文件，方便GitHub Actions下载查看日志
     log_before_raise()
 
-    return option
+    返回选项
 
 
-def cover_option_config(option: JmOption):
-    dir_rule = env('DIR_RULE', None)
-    if dir_rule is not None:
-        the_old = option.dir_rule
-        the_new = DirRule(dir_rule, base_dir=the_old.base_dir)
-        option.dir_rule = the_new
+定义 cover_option_config(选项：JmOption):
+目录规则=env('DIR_rule',没有一个)
+    如果目录规则(_R)是 不 没有一个:
+_old=选项。目录规则(_R)
+新的(_N)=DirRule(Dir_rule，base_dir=旧的。基底目录(_D))
+选项。目录规则(_R)=新的(_N)
 
-    impl = env('CLIENT_IMPL', None)
-    if impl is not None:
-        option.client.impl = impl
+impl=env('CLIENT_IMPL',没有一个)
+    如果impl是 不 没有一个:
+选项。客户.impl=impl
 
-    suffix = env('IMAGE_SUFFIX', None)
-    if suffix is not None:
-        option.download.image.suffix = fix_suffix(suffix)
+后缀=env('Image_SUFFIX',没有一个)
+    如果后缀是 不 没有一个:
+选项。下载.图像.后缀=fix_suffix(后缀)
 
 
-def log_before_raise():
-    jm_download_dir = env('JM_DOWNLOAD_DIR', workspace())
-    mkdir_if_not_exists(jm_download_dir)
+定义 log_before_raise():
+JM_download_dir=env('JM_DOWNLOAD_DIR',工作空间())
+    mkdir_if_not_exists(JM_download_dir)
 
-    def decide_filepath(e):
-        resp = e.context.get(ExceptionTool.CONTEXT_KEY_RESP, None)
+    定义 决定文件路径(_F)(e):
+RESP=e.语境.得到(ExceptionTool。context_KEY_RESP,没有一个)
 
-        if resp is None:
-            suffix = str(time_stamp())
-        else:
-            suffix = resp.url
+        如果RESP是 没有一个:
+后缀=str(time_stamp())
+        其他:
+后缀=resp.URL
 
-        name = '-'.join(
-            fix_windir_name(it)
-            for it in [
-                e.description,
-                current_thread().name,
-                suffix
+name='-'.参加(
+            fix_windir_name(它)
+            为它在……内 [
+e。描述,
+                当前线程(_T)().姓名,
+后缀
             ]
         )
 
-        path = f'{jm_download_dir}/【出错了】{name}.log'
-        return path
+路径=f'{JM_download_dir}/【出错了】{姓名}.log'
+        返回路径
 
-    def exception_listener(e: JmcomicException):
+    定义 异常监听器(_L)(E:JmcomicException):
         """
-        异常监听器，实现了在 GitHub Actions 下，把请求错误的信息下载到文件，方便调试和通知使用者
-        """
+异常监听器，实现了在GitHub操作下，把请求错误的信息下载到文件，方便调试和通知使用者
+"""
         # 决定要写入的文件路径
-        path = decide_filepath(e)
+路径=决定文件路径(_F)(e)
 
         # 准备内容
-        content = [
-            str(type(e)),
-            e.msg,
+内容=[
+            str(类型(e)),
+e。味精,
         ]
-        for k, v in e.context.items():
-            content.append(f'{k}: {v}')
+        为K，v在……内e。语境.项目():
+内容。追加(f'{k}:{v}')
 
-        # resp.text
-        resp = e.context.get(ExceptionTool.CONTEXT_KEY_RESP, None)
-        if resp:
-            content.append(f'响应文本: {resp.text}')
+        #resp.text
+RESP=e.语境.得到(ExceptionTool。context_KEY_RESP,没有一个)
+        如果RESP：
+内容。追加(F'响应文本：{RESP.文本}')
 
         # 写文件
-        write_text(path, '\n'.join(content))
+        写入文字(_T)(路径，'\n'.参加(内容))
 
-    JmModuleConfig.register_exception_listener(JmcomicException, exception_listener)
+JmModuleConfig.register_exception_listener(JmcomicException，exception_listener)
 
 
-if __name__ == '__main__':
-    main()
+如果__name__=='__main__':
+    主要的()
